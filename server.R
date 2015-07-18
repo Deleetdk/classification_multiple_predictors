@@ -5,14 +5,6 @@
 # http://shiny.rstudio.com
 #
 
-library(shiny)
-library(ggplot2)
-library(stringr)
-library(gtools)
-library(plyr)
-library(DT)
-library(grid)
-
 # functions ---------------------------------------------------------------
 
 get_error_beta = function(x) {
