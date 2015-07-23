@@ -16,14 +16,78 @@ percent <- function(x, digits = 2, format = "f", ...) {
 
 rotate <- function(x) t(apply(x, 2, rev))
 
+get_d = function(x, group) {
+  library(psych)
+  desc_x = describeBy(x, group)
+  diff_mean_x = desc_x[[2]]$mean - desc_x[[1]]$mean
+  wtd_sd_x = weighted.mean(c(desc_x[[1]]$sd, desc_x[[2]]$sd),
+                           c(desc_x[[1]]$n, desc_x[[1]]$n))
+  d_x = diff_mean_x / wtd_sd_x
+  return(d_x)
+}
+
+get_color = function(x, y) {
+  c = brewer_pal("qual", palette = 3)(y)[x]
+  return(c)
+}
+
+plot_func = function(outcome_var, color) {
+  #fetch data
+  d = reac_d()
+  d$X = d["outcome_var"] #for easiness
+  
+  #fit
+  fit = glm(Y ~ X, data = d, family = "binomial")
+  
+  #curve
+  d_curve = data.frame(X = seq(min(d$X), max(d$X), sd(d$X)/100) )
+  d_curve$fit = predict(fit, newdata = d_curve, type = "link")
+  d_curve$fit = fit$family$linkinv(d_curve$fit) #rescale to 0-1
+  
+  #plot
+  ggplot(d, aes(X, Y)) +
+    geom_point() +
+    geom_line(data = d_X, aes(x = X, y = fit),
+              color = color,
+              size = 1)
+}
+
+get_d = function(x, group) {
+  library(psych)
+  desc_x = describeBy(x, group)
+  diff_mean_x = desc_x[[1]]$mean - desc_x[[2]]$mean
+  wtd_sd_x = weighted.mean(c(desc_x[[1]]$sd, desc_x[[2]]$sd),
+                           c(desc_x[[1]]$n, desc_x[[1]]$n))
+  d_x = diff_mean_x / wtd_sd_x
+  return(d_x)
+}
+
+#fetch data
+d = reac_d()
+
+#fit
+fit_X1 = glm(Y ~ X1, data = d, family = "binomial")
+
+#X1
+d_X1 = data.frame(X1 = seq(min(d$X1), max(d$X1), sd(d$X1)/100))
+d_X1$fit = predict(fit_X1, newdata = d_X1, type = "link")
+d_X1$fit = fit_X1$family$linkinv(d_X1$fit) #rescale to 0-1
+
+#plot
+ggplot(d, aes(X1, Y)) +
+  geom_point() +
+  geom_line(data = d_X1, aes(x = X1, y = fit),
+            color = brewer_pal("qual", palette = 3)(9)[1],
+            size = 1)
+
 # settings ----------------------------------------------------------------
 
 n = 1e5
-X1 = .4
+X1 = .5
 X1_e = get_error_beta(X1)
-X2 = .3
+X2 = .6
 X2_e = get_error_beta(X2)
-X3 = .2
+X3 = .7
 X3_e = get_error_beta(X3)
 
 #generate
@@ -41,6 +105,9 @@ X3 = Y * X3 + rnorm(n) * X3_e
 
 d = data.frame(Y, X1, X2, X3)
 cor(d)
+
+#d values
+
 
 #fit
 #fit = glm(Y ~ X1 + X2 + X3, data = d, family = "binomial")
@@ -102,3 +169,28 @@ ggplot(d, aes(X2, Y)) +
 ggplot(d, aes(X3, Y)) +
   geom_point() +
   geom_line(data = d_X3, aes(x = X3, y = fit), color = "blue", size = 1)
+
+
+n <- 10000
+beta0 <- 0
+beta1 <- 1
+x <- rnorm(n=n)
+pi_x <- exp(beta0 + beta1 * x) / (1 + exp(beta0 + beta1 * x))
+y <- rbinom(n=length(x), size=1, prob=pi_x)
+data <- data.frame(x, pi_x, y)
+names(data) <- c("age", "pi", "y")
+cor(data)
+get_d(data$age, data$y)
+describe(data)
+
+data = data.frame(Y = c(rep(1, n/2), rep(0, n/2)),
+                  X = c(rnorm(n/2, beta1), rnorm(n/2, 0)))
+cor(data)
+get_d(data$X, data$Y)
+describe(data)
+
+ggplot(data, aes(X, group = Y)) +
+  geom_line(data = data[1:5000, ], aes(y = ..density..), stat = 'density', color = "blue") +
+  geom_line(data = data[5001:10000, ], aes(y = ..density..), stat = 'density', color = "red")
+
+e_density = density(data$X[1:5000])
