@@ -55,7 +55,7 @@ plot_func = function(outcome_var, color) {
 get_d = function(x, group) {
   library(psych)
   desc_x = describeBy(x, group)
-  diff_mean_x = desc_x[[1]]$mean - desc_x[[2]]$mean
+  diff_mean_x = desc_x[[2]]$mean - desc_x[[1]]$mean
   wtd_sd_x = weighted.mean(c(desc_x[[1]]$sd, desc_x[[2]]$sd),
                            c(desc_x[[1]]$n, desc_x[[1]]$n))
   d_x = diff_mean_x / wtd_sd_x

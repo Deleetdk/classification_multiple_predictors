@@ -127,7 +127,8 @@ shinyUI(fluidPage(
                  ),
         tabPanel("Effect size table",
                  DT::dataTableOutput("d_table"))
-      )
+      ),
+      HTML("Made by <a href='http://emilkirkegaard.dk'>Emil O. W. Kirkegaard</a> using <a href='http://shiny.rstudio.com/'/>Shiny</a> for <a href='http://en.wikipedia.org/wiki/R_%28programming_language%29'>R</a>. Source code available <a href='https://github.com/Deleetdk/classification_multiple_predictors'>on Github</a>.")
     )
   )
 ))
